@@ -8,5 +8,32 @@
  */
 
 module.exports = {
-  Tutorials: ['hello'],
+  docs: {
+    'Getting started': [
+      'getting_started/installation',
+      'getting_started/features',
+      'getting_started/quickstart',
+      'getting_started/video_overview',
+      'getting_started/faqs',
+    ],
+    Notes: [
+      'notes/concepts',
+      'notes/configuration',
+      'notes/dataset_zoo',
+      'notes/model_zoo',
+      'notes/pretrained_models',
+      'notes/projects',
+    ],
+    Tutorials: [
+      'tutorials/dataset',
+      'tutorials/concat_bert',
+      'tutorials/checkpointing',
+    ],
+    Challenges: [
+      'challenges/hateful_memes_challenge',
+      'challenges/textvqa_challenge',
+      'challenges/vqa_challenge',
+    ],
+    Projects: ['projects/m4c'],
+  },
 };

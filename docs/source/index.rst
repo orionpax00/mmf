@@ -5,21 +5,6 @@
 
 :github_url: https://github.com/facebookresearch/mmf
 
-.. raw:: html
-
-    <script type="text/javascript">
-      // Redirect for older pythia documentation
-      (function(l) {
-        if (window.location.href.indexOf('learnpythia') !== -1) {
-          var splits = window.location.href.split('/');
-          splits = splits.slice(splits.indexOf("learnpythia.readthedocs.io") + 1);
-          splits = ['https://mmf.readthedocs.io'].concat(splits);
-          splits = splits.join('/');
-          window.location.href = splits;
-       }
-      }(window.location));
-    </script>
-
 MMF
 ===
 
@@ -50,48 +35,22 @@ research built on top of PyTorch. Using MMF, researchers and devlopers can train
 custom models for VQA, Image Captioning, Visual Dialog, Hate Detection and other vision
 and language tasks.
 
+Read docs_ for tutorials and documentation.
 
 Citation
 ========
 
-If you use MMF in your work, please cite:
+If you use MMF in your work or use any models published in MMF, please cite:
 
 .. code-block:: text
 
-    @inproceedings{singh2019pythia,
-        title={Pythia-a platform for vision \& language research},
-        author={Singh, Amanpreet and Natarajan, Vivek and Jiang, Yu and Chen, Xinlei and Shah, Meet and Rohrbach, Marcus and Batra, Dhruv and Parikh, Devi},
-        booktitle={SysML Workshop, NeurIPS},
-        volume={2018},
-        year={2019}
+    @misc{singh2020mmf,
+    author =       {Singh, Amanpreet and Goswami, Vedanuj and Natarajan, Vivek and Jiang, Yu and Chen, Xinlei and Shah, Meet and
+                    Rohrbach, Marcus and Batra, Dhruv and Parikh, Devi},
+    title =        {MMF: A multimodal framework for vision and language research},
+    howpublished = {\url{https://github.com/facebookresearch/mmf}},
+    year =         {2020}
     }
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Getting Started
-
-   notes/installation
-   notes/quickstart
-   notes/features
-   notes/pretrained_models
-   notes/configuration
-   notes/challenge
-   notes/faq
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Challenges
-
-   notes/hateful_memes_challenge
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Extending MMF
-
-   tutorials/concepts
-   tutorials/dataset
-   tutorials/late_fusion
-   tutorials/mmf_bert
 
 .. toctree::
    :maxdepth: 1
@@ -107,15 +66,6 @@ If you use MMF in your work, please cite:
    lib/datasets/processors
    lib/utils/text
 
-.. toctree::
-   :maxdepth: 0
-   :hidden:
-   :caption: Others
-
-   others/model_config
-   others/dataset_config
-   others/user_config
-
 
 
 Indices and tables
@@ -124,3 +74,5 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+.. _docs: https://mmf.sh/docs

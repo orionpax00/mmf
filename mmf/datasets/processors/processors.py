@@ -1,4 +1,5 @@
 # Copyright (c) Facebook, Inc. and its affiliates.
+
 """
 The processors exist in MMF to make data processing pipelines in various
 datasets as similar as possible while allowing code reuse.
@@ -24,26 +25,21 @@ different moving parts.
 
 Config::
 
-
     dataset_config:
-        vqa2:
-            processors:
-                text_processor:
-                type: vocab
-                params:
-                    max_length: 14
-                    vocab:
-                    type: intersected
-                    embedding_name: glove.6B.300d
-                    vocab_file: vocabs/vocabulary_100k.txt
-                    answer_processor:
-                    type: vqa_answer
-                    params:
-                        num_answers: 10
-                        vocab_file: vocabs/answers_vqa.txt
-                        preprocessor:
-                        type: simple_word
-                        params: {}
+      vqa2:
+        data_dir: ${env.data_dir}
+        processors:
+          text_processor:
+            type: vocab
+            params:
+              max_length: 14
+              vocab:
+                type: intersected
+                embedding_name: glove.6B.300d
+                vocab_file: vqa2/defaults/extras/vocabs/vocabulary_100k.txt
+              preprocessor:
+                type: simple_sentence
+                params: {}
 
 ``BaseDataset`` will init the processors and they will available inside your
 dataset with same attribute name as the key name, for e.g. `text_processor` will
@@ -59,7 +55,7 @@ Example::
     from mmf.common.registry import registry
     from mmf.datasets.processors import BaseProcessor
 
-
+    @registry.register_processor('my_processor')
     class MyProcessor(BaseProcessor):
         def __init__(self, config, *args, **kwargs):
             return
@@ -70,10 +66,10 @@ Example::
             return {"text": text}
 """
 
-
 import copy
 import os
 import re
+import sys
 import warnings
 from collections import Counter, defaultdict
 
@@ -140,7 +136,7 @@ class Processor:
 
         params = {}
         if not hasattr(config, "params"):
-            self.writer.write(
+            warnings.warn(
                 "Config doesn't have 'params' attribute to "
                 "specify parameters of the processor "
                 "of type {}. Setting to default {{}}".format(config.type)
@@ -178,18 +174,18 @@ class VocabProcessor(BaseProcessor):
 
     Example Config::
 
-        task_attributes:
-            vqa:
-                vqa2:
-                    processors:
-                      text_processor:
-                        type: vocab
-                        params:
-                          max_length: 14
-                          vocab:
-                            type: intersected
-                            embedding_name: glove.6B.300d
-                            vocab_file: vocabs/vocabulary_100k.txt
+        dataset_config:
+          vqa2:
+            data_dir: ${env.data_dir}
+            processors:
+              text_processor:
+                type: vocab
+                params:
+                  max_length: 14
+                  vocab:
+                    type: intersected
+                    embedding_name: glove.6B.300d
+                    vocab_file: vqa2/defaults/extras/vocabs/vocabulary_100k.txt
 
     Args:
         config (DictConfig): node containing configuration parameters of
@@ -214,7 +210,8 @@ class VocabProcessor(BaseProcessor):
         self._init_extras(config)
 
     def _init_extras(self, config, *args, **kwargs):
-        self.writer = registry.get("writer")
+        writer = registry.get("writer")
+        self.writer = writer if writer is not None else sys.stdout
         self.preprocessor = None
 
         if hasattr(config, "max_length"):
@@ -403,7 +400,7 @@ class FastTextProcessor(VocabProcessor):
             needs_download = True
 
         if needs_download:
-            self.writer.write("Downloading FastText bin", "info")
+            self.writer.write("Downloading FastText bin")
             model_file = self._download_model()
 
         self.model_file = model_file
@@ -419,7 +416,7 @@ class FastTextProcessor(VocabProcessor):
             return model_file_path
 
         if PathManager.exists(model_file_path):
-            self.writer.write(f"Vectors already present at {model_file_path}.", "info")
+            self.writer.write(f"Vectors already present at {model_file_path}.")
             return model_file_path
 
         import requests
@@ -446,7 +443,7 @@ class FastTextProcessor(VocabProcessor):
 
             pbar.close()
 
-        self.writer.write(f"fastText bin downloaded at {model_file_path}.", "info")
+        self.writer.write(f"fastText bin downloaded at {model_file_path}.")
 
         return model_file_path
 
@@ -545,14 +542,18 @@ class VQAAnswerProcessor(BaseProcessor):
             Dict: Processed answers, indices and scores.
 
         """
-        tokens = None
+        tokens = []
 
         if not isinstance(item, dict):
             raise TypeError("'item' passed to processor must be a dict")
 
         if "answer_tokens" in item:
             tokens = item["answer_tokens"]
-        elif "answers" in item:
+        elif (
+            "answers" in item
+            and item["answers"] is not None
+            and len(item["answers"]) > 0
+        ):
             if self.preprocessor is None:
                 raise AssertionError(
                     "'preprocessor' must be defined if you "
@@ -569,7 +570,9 @@ class VQAAnswerProcessor(BaseProcessor):
                 " to answer processor in a dict"
             )
 
-        tokens = self._increase_to_ten(tokens)
+        if len(tokens) != 0:
+            tokens = self._increase_to_ten(tokens)
+
         answers_indices = torch.zeros(self.DEFAULT_NUM_ANSWERS, dtype=torch.long)
         answers_indices.fill_(self.answer_vocab.get_unk_index())
 
